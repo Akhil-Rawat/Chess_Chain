@@ -12,10 +12,16 @@ import { Plus, TrendingUp, Trophy, Clock, Sparkles } from "lucide-react";
 
 interface GameListItem {
   id: string;
-  creator: string;
   wagerAmount: string;
   timeControl: string;
   createdAt: string;
+  player1?: {
+    id: number;
+    username: string;
+    address: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 const Home = () => {
