@@ -9,7 +9,7 @@
   ],
   "functions": {
     "api/*.js": {
-      "runtime": "nodejs18.x"
+      "runtime": "nodejs18"
     }
   },
   "env": {
