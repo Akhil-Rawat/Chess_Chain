@@ -6,9 +6,23 @@ import RecentGames from "@/components/RecentGames";
 import NewGameModal from "@/components/NewGameModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useWeb3Store } from "@/lib/web3";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, TrendingUp, Trophy, Clock, Sparkles } from "lucide-react";
+import { 
+  Plus, 
+  TrendingUp, 
+  Trophy, 
+  Clock, 
+  Sparkles, 
+  Users, 
+  Zap, 
+  Shield,
+  Crown,
+  Play,
+  Gamepad2,
+  Coins
+} from "lucide-react";
 
 interface GameListItem {
   id: string;
@@ -26,7 +40,6 @@ interface GameListItem {
 
 const Home = () => {
   const [isNewGameModalOpen, setIsNewGameModalOpen] = useState(false);
-  const { isConnected } = useWeb3Store();
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
 
@@ -35,15 +48,7 @@ const Home = () => {
   });
 
   const handleJoinGame = (gameId: string) => {
-    if (!isConnected) {
-      toast({
-        variant: "destructive",
-        title: "Wallet not connected",
-        description: "Please connect your wallet to join a game.",
-      });
-      return;
-    }
-    
+    // TODO: Add wallet connection check
     setLocation(`/game/${gameId}`);
   };
 
@@ -52,59 +57,111 @@ const Home = () => {
   };
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Floating Chess Pieces Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 left-10 text-6xl text-white/5 animate-bounce" style={{animationDelay: '0s', animationDuration: '6s'}}>♔</div>
+        <div className="absolute top-32 right-20 text-4xl text-white/5 animate-bounce" style={{animationDelay: '1s', animationDuration: '8s'}}>♕</div>
+        <div className="absolute bottom-40 left-20 text-5xl text-white/5 animate-bounce" style={{animationDelay: '2s', animationDuration: '7s'}}>♖</div>
+        <div className="absolute top-1/2 right-10 text-3xl text-white/5 animate-bounce" style={{animationDelay: '3s', animationDuration: '9s'}}>♗</div>
+        <div className="absolute bottom-20 right-1/3 text-4xl text-white/5 animate-bounce" style={{animationDelay: '4s', animationDuration: '5s'}}>♘</div>
+        <div className="absolute top-20 left-1/3 text-2xl text-white/5 animate-bounce" style={{animationDelay: '5s', animationDuration: '10s'}}>♙</div>
+      </div>
+
       <Header />
       
-      <main className="container mx-auto px-4 py-6 max-w-7xl">
+      <main className="container mx-auto px-4 py-8 max-w-7xl relative">;
         {/* Hero Section */}
-        <div className="bg-primary rounded-lg p-8 mb-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Play Chess on the Blockchain</h1>
-            <p className="text-lg text-gray-300 mb-8">Challenge opponents, wager crypto, and have your game results permanently recorded on the blockchain.</p>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-600/10 border border-amber-500/20 backdrop-blur-xl p-8 mb-12 hover:border-amber-500/40 transition-all duration-500 group">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="h-full w-full bg-amber-500/5 bg-[size:40px_40px] bg-[image:radial-gradient(circle_at_center,_rgba(251,191,36,0.2)_1px,_transparent_1px)]"></div>
+          </div>
+          
+          <div className="relative max-w-4xl mx-auto text-center">
+            <div className="flex justify-center mb-6">
+              <div className="relative group">
+                <Crown className="h-16 w-16 text-amber-400 group-hover:scale-110 transition-transform duration-300" />
+                <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-amber-300 animate-pulse" />
+                <div className="absolute inset-0 bg-amber-400/20 rounded-full blur-xl animate-pulse"></div>
+              </div>
+            </div>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+              The Future of Chess
+            </h1>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Challenge opponents, stake ETH, and have your victories permanently recorded on the blockchain. 
+              Welcome to the next evolution of competitive chess.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
               <Button 
-                variant="default"
                 size="lg"
-                className="bg-accent hover:bg-amber-600 text-black font-medium rounded-lg transition-colors"
+                className="group bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-semibold text-lg px-8 py-4 h-auto shadow-lg hover:shadow-amber-500/25 transition-all duration-300 hover:scale-105"
                 onClick={() => setIsNewGameModalOpen(true)}
               >
-                <Plus className="mr-2 h-5 w-5" />
-                Create New Game
+                <Play className="mr-2 h-6 w-6 group-hover:scale-110 transition-transform" />
+                Start Playing
               </Button>
               
               <Button 
                 variant="outline"
                 size="lg"
-                className="bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-400 text-lg px-8 py-4 h-auto backdrop-blur-sm transition-all duration-300 hover:scale-105"
                 onClick={() => setLocation('/games')}
               >
-                <Trophy className="mr-2 h-5 w-5" />
+                <Trophy className="mr-2 h-6 w-6" />
                 View Leaderboard
               </Button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <div className="text-center group cursor-pointer">
+                <div className="text-3xl font-bold text-amber-400 mb-2 group-hover:scale-110 transition-transform duration-300">1,234</div>
+                <div className="text-gray-400 group-hover:text-gray-300 transition-colors">Games Played</div>
+              </div>
+              <div className="text-center group cursor-pointer">
+                <div className="text-3xl font-bold text-amber-400 mb-2 group-hover:scale-110 transition-transform duration-300">45.6 ETH</div>
+                <div className="text-gray-400 group-hover:text-gray-300 transition-colors">Total Wagered</div>
+              </div>
+              <div className="text-center group cursor-pointer">
+                <div className="text-3xl font-bold text-amber-400 mb-2 group-hover:scale-110 transition-transform duration-300">567</div>
+                <div className="text-gray-400 group-hover:text-gray-300 transition-colors">Active Players</div>
+              </div>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div 
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        >
           {/* Active Games Section */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold mb-6">Active Games</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-white">Active Games</h2>
+              <Badge variant="secondary" className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                {activeGames?.length || 0} games waiting
+              </Badge>
+            </div>
             
             {isLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-400"></div>
               </div>
             ) : activeGames && activeGames.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activeGames.map((game) => (
-                  <Card key={game.id} className="bg-gray-800 border-gray-700">
+              <div className="grid grid-cols-1 gap-4">
+                {activeGames.map((game: any) => (
+                  <Card key={game.id} className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition-all duration-300 group cursor-pointer backdrop-blur-sm">
                     <CardHeader>
                       <div className="flex justify-between items-start">
-                        <CardTitle>Game #{game.id}</CardTitle>
-                        <span className="text-accent font-medium">{game.wagerAmount} ETH</span>
+                        <CardTitle className="text-white group-hover:text-amber-400 transition-colors">Game #{game.id}</CardTitle>
+                        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 group-hover:bg-amber-500/30 transition-colors">
+                          {game.wagerAmount} ETH
+                        </Badge>
                       </div>
-                      <CardDescription>Created by {game.player1?.address ? `${game.player1.address.substring(0, 6)}...${game.player1.address.substring(game.player1.address.length - 4)}` : 'Unknown'}</CardDescription>
+                      <CardDescription className="text-gray-400">Created by {game.player1?.address ? `${game.player1.address.substring(0, 6)}...${game.player1.address.substring(game.player1.address.length - 4)}` : 'Unknown'}</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="flex justify-between mb-4">

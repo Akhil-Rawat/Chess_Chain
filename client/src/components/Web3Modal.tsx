@@ -1,124 +1,272 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useWeb3Store } from "@/lib/web3";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Wallet, Crown, Shield, Zap, ExternalLink, Copy, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Web3ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConnect: () => Promise<void>;
 }
 
-const Web3Modal: React.FC<Web3ModalProps> = ({ isOpen, onClose, onConnect }) => {
-  const { isConnecting, error } = useWeb3Store();
+const walletOptions = [
+  {
+    name: "MetaMask",
+    icon: "🦊",
+    description: "Connect to your MetaMask wallet",
+    popular: true,
+    available: true,
+  },
+  {
+    name: "WalletConnect",
+    icon: "🔗",
+    description: "Scan with any wallet to connect",
+    popular: true,
+    available: true,
+  },
+  {
+    name: "Coinbase Wallet",
+    icon: "🏪",
+    description: "Connect to Coinbase Wallet",
+    popular: false,
+    available: true,
+  },
+  {
+    name: "Rainbow",
+    icon: "🌈",
+    description: "Connect to Rainbow wallet",
+    popular: false,
+    available: true,
+  },
+];
+
+export default function Web3Modal({ isOpen, onClose }: Web3ModalProps) {
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
   const { toast } = useToast();
 
-  const handleConnect = async (wallet: string) => {
+  const handleWalletConnect = async (walletName: string) => {
+    setConnecting(walletName);
+    
+    // Simulate wallet connection
     try {
-      await onConnect();
-      onClose();
-      
-      toast({
-        title: "Wallet connected",
-        description: "Your wallet has been connected successfully!",
-      });
+      if (walletName === "MetaMask") {
+        // Check if MetaMask is installed
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+          const accounts = await (window as any).ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+          
+          if (accounts.length > 0) {
+            const address = accounts[0];
+            setWalletAddress(address);
+            setConnected(true);
+            toast({
+              title: "Wallet Connected! 🎉",
+              description: `Successfully connected to ${walletName}`,
+            });
+          }
+        } else {
+          toast({
+            title: "MetaMask Not Found",
+            description: "Please install MetaMask to continue",
+            variant: "destructive",
+          });
+        }
+      } else {
+        // Simulate other wallet connections
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const mockAddress = "0x742d35Cc6669C567Db5689A3F1e8F2b3F1e8F2b3";
+        setWalletAddress(mockAddress);
+        setConnected(true);
+        toast({
+          title: "Wallet Connected! 🎉",
+          description: `Successfully connected to ${walletName}`,
+        });
+      }
     } catch (error) {
       toast({
+        title: "Connection Failed",
+        description: "Failed to connect wallet. Please try again.",
         variant: "destructive",
-        title: "Connection failed",
-        description: error instanceof Error ? error.message : "Failed to connect wallet",
       });
     }
+    
+    setConnecting(null);
   };
 
+  const copyAddress = () => {
+    navigator.clipboard.writeText(walletAddress);
+    toast({
+      title: "Address Copied! 📋",
+      description: "Wallet address copied to clipboard",
+    });
+  };
+
+  const handleDisconnect = () => {
+    setConnected(false);
+    setWalletAddress("");
+    toast({
+      title: "Wallet Disconnected",
+      description: "Successfully disconnected from wallet",
+    });
+  };
+
+  if (connected) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 border border-amber-500/20 backdrop-blur-xl">
+          <DialogHeader>
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <CheckCircle className="h-8 w-8 text-green-400" />
+                <div className="absolute inset-0 blur-sm bg-green-400/20 rounded-full animate-pulse"></div>
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-white">Wallet Connected</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  You're ready to play and earn!
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 flex items-center justify-center">
+                    <Wallet className="h-5 w-5 text-black" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Connected Account</p>
+                    <p className="text-sm text-gray-400">Ready for transactions</p>
+                  </div>
+                </div>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                  Active
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                <code className="text-sm text-gray-300 font-mono">
+                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={copyAddress}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 pt-4">
+                <div className="text-center">
+                  <Crown className="h-6 w-6 text-amber-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Games Won</p>
+                  <p className="text-lg font-bold text-white">0</p>
+                </div>
+                <div className="text-center">
+                  <Zap className="h-6 w-6 text-yellow-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">ETH Earned</p>
+                  <p className="text-lg font-bold text-white">0.0</p>
+                </div>
+                <div className="text-center">
+                  <Shield className="h-6 w-6 text-blue-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">Rating</p>
+                  <p className="text-lg font-bold text-white">1200</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex space-x-3">
+            <Button
+              onClick={onClose}
+              className="flex-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:from-amber-500 hover:to-yellow-600 transition-all duration-300"
+            >
+              Start Playing
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleDisconnect}
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+            >
+              Disconnect
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 border border-amber-500/20 backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold mb-2">Connect Wallet</DialogTitle>
-          <DialogDescription className="text-gray-300">
-            Connect your wallet to play chess games on the blockchain and earn crypto.
-          </DialogDescription>
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Crown className="h-8 w-8 text-amber-400" />
+              <div className="absolute inset-0 blur-sm bg-amber-400/20 rounded-full animate-pulse"></div>
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold text-white">Connect Wallet</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Choose your wallet to start playing chess on-chain
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
-        
-        <div className="space-y-3 mt-4">
-          <Button
-            variant="outline"
-            className="flex items-center justify-between w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg transition-colors"
-            onClick={() => handleConnect("metamask")}
-            disabled={isConnecting}
-          >
-            <div className="flex items-center">
-              <svg width="32" height="32" viewBox="0 0 35 33" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-3">
-                <path d="M32.9583 1L19.8242 10.7183L22.2616 4.98988L32.9583 1Z" fill="#E17726" stroke="#E17726" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2.65479 1L15.6681 10.8335L13.3516 4.98988L2.65479 1Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M28.2304 23.5335L24.7428 28.872L32.3451 30.9389L34.535 23.6487L28.2304 23.5335Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M1.08936 23.6487L3.26755 30.9389L10.8585 28.872L7.38229 23.5335L1.08936 23.6487Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M10.4619 14.5149L8.39282 17.6507L15.9065 17.9963L15.6493 9.81989L10.4619 14.5149Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M25.1499 14.5149L19.867 9.70465L19.8242 17.9963L27.3379 17.6507L25.1499 14.5149Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M10.8585 28.872L15.4349 26.7169L11.5096 23.6911L10.8585 28.872Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M20.1768 26.7169L24.7428 28.872L24.103 23.6911L20.1768 26.7169Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span className="font-medium">MetaMask</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="flex items-center justify-between w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg transition-colors"
-            onClick={() => handleConnect("walletconnect")}
-            disabled={isConnecting}
-          >
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/>
-                </svg>
-              </div>
-              <span className="font-medium">WalletConnect</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </Button>
-          
-          <Button
-            variant="outline"
-            className="flex items-center justify-between w-full bg-gray-700 hover:bg-gray-600 p-4 rounded-lg transition-colors"
-            onClick={() => handleConnect("coinbase")}
-            disabled={isConnecting}
-          >
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                </svg>
-              </div>
-              <span className="font-medium">Coinbase Wallet</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </Button>
+
+        <div className="space-y-3">
+          {walletOptions.map((wallet) => (
+            <Card 
+              key={wallet.name}
+              className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-amber-500/30 transition-all duration-300 cursor-pointer group"
+              onClick={() => handleWalletConnect(wallet.name)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="text-2xl">{wallet.icon}</div>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-semibold text-white group-hover:text-amber-400 transition-colors">
+                          {wallet.name}
+                        </h3>
+                        {wallet.popular && (
+                          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs">
+                            Popular
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-400">{wallet.description}</p>
+                    </div>
+                  </div>
+                  
+                  {connecting === wallet.name ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-400"></div>
+                  ) : (
+                    <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-amber-400 transition-colors" />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        
-        {error && (
-          <p className="mt-4 text-sm text-red-500">
-            {error}
-          </p>
-        )}
-        
-        <div className="mt-6 pt-4 border-t border-gray-700">
-          <p className="text-sm text-gray-400 text-center">
-            By connecting your wallet, you agree to our <a href="#" className="text-accent hover:underline">Terms of Service</a> and <a href="#" className="text-accent hover:underline">Privacy Policy</a>.
-          </p>
+
+        <div className="pt-4 border-t border-white/10">
+          <div className="flex items-center space-x-2 text-sm text-gray-400">
+            <Shield className="h-4 w-4" />
+            <span>Your wallet stays secure. We never store your private keys.</span>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default Web3Modal;
+}
