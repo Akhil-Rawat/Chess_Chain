@@ -45,6 +45,19 @@ const Home = () => {
 
   const { data: activeGames, isLoading } = useQuery<GameListItem[]>({
     queryKey: ['/api/games/active'],
+    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/games/active');
+        if (!response.ok) throw new Error('API not available');
+        return await response.json();
+      } catch (error) {
+        // Return empty array as fallback when API is not available
+        return [];
+      }
+    }
   });
 
   const handleJoinGame = (gameId: string) => {
@@ -70,7 +83,7 @@ const Home = () => {
 
       <Header />
       
-      <main className="container mx-auto px-4 py-8 max-w-7xl relative">;
+      <main className="container mx-auto px-4 py-8 max-w-7xl relative">
         {/* Hero Section */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-600/10 border border-amber-500/20 backdrop-blur-xl p-8 mb-12 hover:border-amber-500/40 transition-all duration-500 group">
           {/* Background Pattern */}
