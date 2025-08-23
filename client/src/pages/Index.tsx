@@ -9,7 +9,8 @@ import RecentGames from "@/components/RecentGames";
 import NewGameModal from "@/components/NewGameModal";
 import Web3Modal from "@/components/Web3Modal";
 import { useWeb3Store } from "@/lib/web3";
-import { Crown, Shield, Trophy, Wallet, TrendingUp, Swords, Clock3 } from "lucide-react";
+import { useVisitorCounter } from "@/hooks/use-visitor-counter";
+import { Crown, Shield, Trophy, Wallet, TrendingUp, Swords, Clock3, Eye, Heart } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface GameListItem {
@@ -33,6 +34,7 @@ const Index = () => {
   const [isNewGameModalOpen, setIsNewGameModalOpen] = useState(false);
   const [isWeb3ModalOpen, setIsWeb3ModalOpen] = useState(false);
   const { account, isConnected } = useWeb3Store();
+  const { visitorCount, loading: visitorLoading } = useVisitorCounter();
 
   const { data: activeGames } = useQuery<GameListItem[]>({
     queryKey: ['/api/games/active'],
@@ -200,7 +202,7 @@ const Index = () => {
                   <Trophy className="mr-2" /> View Leaderboard
                 </Button>
               </div>
-              <div className="mt-10 grid grid-cols-1 gap-6 text-left sm:grid-cols-3">
+              <div className="mt-10 grid grid-cols-1 gap-6 text-left sm:grid-cols-4">
                 <div>
                   <div className="text-2xl font-bold text-primary">1,234</div>
                   <div className="text-sm text-muted-foreground">Games Played</div>
@@ -212,6 +214,12 @@ const Index = () => {
                 <div>
                   <div className="text-2xl font-bold text-primary">567</div>
                   <div className="text-sm text-muted-foreground">Active Players</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-primary">
+                    {visitorLoading ? '...' : visitorCount.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Visits</div>
                 </div>
               </div>
             </div>
@@ -334,9 +342,30 @@ const Index = () => {
         </section>
       </main>
 
-      <footer className="border-t border-border/60 py-8 text-center text-sm text-muted-foreground">
+      <footer className="border-t border-border/60 py-8">
         <div className="container mx-auto px-6">
-          © {new Date().getFullYear()} ChessChain. All rights reserved.
+          {/* Visitor Counter */}
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 border border-border/30">
+              <Eye className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">
+                {visitorLoading ? '...' : visitorCount.toLocaleString()} total visits
+              </span>
+            </div>
+          </div>
+          
+          {/* Footer Text */}
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <span>Made with</span>
+              <Heart className="h-4 w-4 text-red-500 fill-red-500 animate-pulse" />
+              <span>by</span>
+              <span className="text-primary font-medium">Akhil</span>
+            </div>
+            <div className="text-xs text-muted-foreground/70">
+              © {new Date().getFullYear()} ChessChain. All rights reserved.
+            </div>
+          </div>
         </div>
       </footer>
 
