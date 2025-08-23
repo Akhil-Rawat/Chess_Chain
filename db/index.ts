@@ -26,12 +26,16 @@ sqlite.exec(`
     fen TEXT NOT NULL DEFAULT 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
     current_turn TEXT NOT NULL DEFAULT 'white',
     draw_offered INTEGER NOT NULL DEFAULT 0,
+    contract_address TEXT,
+    transaction_hash TEXT,
+    network TEXT,
+    wager_status TEXT NOT NULL DEFAULT 'pending',
     winner_id INTEGER,
     result TEXT,
-    contract_address TEXT,
     tournament_id INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_move_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player1_id) REFERENCES users(id),
     FOREIGN KEY (player2_id) REFERENCES users(id),
     FOREIGN KEY (winner_id) REFERENCES users(id)
@@ -48,6 +52,18 @@ sqlite.exec(`
     time_remaining_black INTEGER,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (game_id) REFERENCES games(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS game_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id INTEGER NOT NULL,
+    player_id INTEGER NOT NULL,
+    move TEXT NOT NULL,
+    fen TEXT NOT NULL,
+    move_number INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES games(id),
+    FOREIGN KEY (player_id) REFERENCES users(id)
   );
 
   CREATE TABLE IF NOT EXISTS chat_messages (

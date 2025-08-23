@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useRoute } from "wouter";
+import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import Header from "@/components/Header";
+import Navbar from "@/components/layout/Navbar";
 import ChessBoard from "@/components/ChessBoard";
 import GameInfo from "@/components/GameInfo";
 import GameControls from "@/components/GameControls";
@@ -35,8 +35,8 @@ interface GameData {
 }
 
 const Game = () => {
-  const [match, params] = useRoute<{ id: string }>('/game/:id');
-  const gameId = match ? params.id : '0';
+  const { id } = useParams<{ id: string }>();
+  const gameId = id || '0';
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { account } = useWeb3Store();
@@ -165,10 +165,10 @@ const Game = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-background text-foreground font-sans min-h-screen">
-        <Header />
+      <div className="min-h-screen bg-hero">
+        <Navbar />
         <main className="container mx-auto px-4 py-6 max-w-7xl flex justify-center items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-accent"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
         </main>
       </div>
     );
@@ -176,12 +176,12 @@ const Game = () => {
 
   if (isError || !game) {
     return (
-      <div className="bg-background text-foreground font-sans min-h-screen">
-        <Header />
+      <div className="min-h-screen bg-hero">
+        <Navbar />
         <main className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="bg-gray-800 rounded-lg p-8 text-center">
+          <div className="surface-card rounded-lg p-8 text-center">
             <h2 className="text-xl font-bold mb-4">Game Not Found</h2>
-            <p className="text-gray-400">The game you are looking for does not exist or there was an error loading it.</p>
+            <p className="text-muted-foreground">The game you are looking for does not exist or there was an error loading it.</p>
           </div>
         </main>
       </div>
@@ -189,8 +189,8 @@ const Game = () => {
   }
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen">
-      <Header />
+    <div className="min-h-screen bg-hero">
+      <Navbar />
       
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-6">
